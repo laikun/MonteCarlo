@@ -1,0 +1,12 @@
+C:\Unity Projects\MonteCarlo\obj\Debug\Assembly-CSharp.csprojResolveAssemblyReference.cache
+C:\Unity Projects\MonteCarlo\obj\Debug\Assembly-CSharp.dll
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\Assembly-CSharp.dll
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\Assembly-CSharp.pdb
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\UnityEditor.dll
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\UnityEngine.dll
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\Mono.Cecil.dll
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\nunit.framework.dll
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\Unity.DataContract.dll
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\ICSharpCode.NRefactory.dll
+C:\Unity Projects\MonteCarlo\obj\Debug\Assembly-CSharp.pdb
+C:\Unity Projects\MonteCarlo\Temp\bin\Debug\IFacebook.dll
