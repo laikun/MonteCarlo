@@ -4,6 +4,10 @@ ehthumbs.db
 
 #Unity Temp,Meta
 Temp/
+obj/
+Library/
+*.log
+*.dll
 *.meta
 
 # Folder config file

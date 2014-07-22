@@ -6,6 +6,7 @@ public class K_SceneInit : MonoSingleton<K_SceneInit>
     // Use this for initialization
     void Start()
     {
+        K_FB temp = K_FB.Instance;
         StartCoroutine(Go());
     }
 
@@ -13,6 +14,5 @@ public class K_SceneInit : MonoSingleton<K_SceneInit>
     {
         yield return new WaitForSeconds(1f);
         K_SceneManager.SwitchScene("Title");
-        K_FB.Instance.FBdigest(() => { });
     }
 }

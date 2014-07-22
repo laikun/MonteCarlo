@@ -7,8 +7,6 @@ using System.Collections;
 
 public class K_FB : SingletonInGame<K_FB>
 {
-    #region FB.Init() example
-
     public bool IsInit {private set; get;}
 
     public class UserScore
@@ -70,7 +68,7 @@ public class K_FB : SingletonInGame<K_FB>
         }
     }
 
-    public void CallFBInit()
+    private void CallFBInit()
     {
         if (IsInit)
             return;
@@ -91,10 +89,6 @@ public class K_FB : SingletonInGame<K_FB>
     {
         this.FBlog("Is game showing? " + isGameShown);
     }
-
-    #endregion
-
-    #region FB.Login() example 
 
     private void CallFBLogin()
     {
@@ -125,7 +119,6 @@ public class K_FB : SingletonInGame<K_FB>
         this.FBlog("CallFBLogout");
         FB.Logout();
     }
-    #endregion
 
     #region FB.PublishInstall() example
 
@@ -139,6 +132,15 @@ public class K_FB : SingletonInGame<K_FB>
         Debug.Log("publish response: " + result.Text);
     }
 
+    protected override void awake()
+    {
+        FBdigest(() => this.FBlog(""));
+    }
+
+    protected override void onDestroy()
+    {
+        CallFBLogout();
+    }
     #endregion
 
     #region FB.AppRequest() Friend Selector
@@ -210,41 +212,41 @@ public class K_FB : SingletonInGame<K_FB>
 
     #region FB.Feed() example
 
-    public string FeedToId = "";
-    public string FeedLink = "";
-    public string FeedLinkName = "";
-    public string FeedLinkCaption = "";
-    public string FeedLinkDescription = "";
-    public string FeedPicture = "";
-    public string FeedMediaSource = "";
-    public string FeedActionName = "";
-    public string FeedActionLink = "";
-    public string FeedReference = "";
-    public bool IncludeFeedProperties = false;
-    private Dictionary<string, string[]> FeedProperties = new Dictionary<string, string[]>();
+    //public string FeedToId = "";
+    //public string FeedLink = "";
+    //public string FeedLinkName = "";
+    //public string FeedLinkCaption = "";
+    //public string FeedLinkDescription = "";
+    //public string FeedPicture = "";
+    //public string FeedMediaSource = "";
+    //public string FeedActionName = "";
+    //public string FeedActionLink = "";
+    //public string FeedReference = "";
+    //public bool IncludeFeedProperties = false;
+    //private Dictionary<string, string[]> FeedProperties = new Dictionary<string, string[]>();
 
-    private void CallFBFeed()
-    {
-        Dictionary<string, string[]> feedProperties = null;
-        if (IncludeFeedProperties)
-        {
-            feedProperties = FeedProperties;
-        }
-        FB.Feed(
-            toId: FeedToId,
-            link: FeedLink,
-            linkName: FeedLinkName,
-            linkCaption: FeedLinkCaption,
-            linkDescription: FeedLinkDescription,
-            picture: FeedPicture,
-            mediaSource: FeedMediaSource,
-            actionName: FeedActionName,
-            actionLink: FeedActionLink,
-            reference: FeedReference,
-            properties: feedProperties,
-            callback: Callback
-        );
-    }
+    //private void CallFBFeed()
+    //{
+    //    Dictionary<string, string[]> feedProperties = null;
+    //    if (IncludeFeedProperties)
+    //    {
+    //        feedProperties = FeedProperties;
+    //    }
+    //    FB.Feed(
+    //        toId: FeedToId,
+    //        link: FeedLink,
+    //        linkName: FeedLinkName,
+    //        linkCaption: FeedLinkCaption,
+    //        linkDescription: FeedLinkDescription,
+    //        picture: FeedPicture,
+    //        mediaSource: FeedMediaSource,
+    //        actionName: FeedActionName,
+    //        actionLink: FeedActionLink,
+    //        reference: FeedReference,
+    //        properties: feedProperties,
+    //        callback: Callback
+    //    );
+    //}
 
     #endregion
 
@@ -373,23 +375,6 @@ public class K_FB : SingletonInGame<K_FB>
             return Screen.height;
 #endif
         }
-    }
-
-    protected override void awake()
-    {
-        textStyle.alignment = TextAnchor.UpperLeft;
-        textStyle.wordWrap = true;
-        textStyle.padding = new RectOffset(10, 10, 10, 10);
-        textStyle.stretchHeight = true;
-        textStyle.stretchWidth = false;
-
-        FeedProperties.Add("key1", new[] { "valueString1" });
-        FeedProperties.Add("key2", new[] { "valueString2", "http://www.facebook.com" });
-    }
-
-    protected override void onDestroy()
-    {
-        CallFBLogout();
     }
 
 //    void OnGUI()

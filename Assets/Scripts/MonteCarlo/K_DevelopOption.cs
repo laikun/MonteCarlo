@@ -4,7 +4,6 @@ using System;
 
 public class K_DevelopOption : SingletonInGame<K_DevelopOption>
 {
-
     public bool OnScreen { get; set; }
 
     bool showUp;
@@ -35,11 +34,11 @@ public class K_DevelopOption : SingletonInGame<K_DevelopOption>
         K_OptionData.Set<int>("TurnLimit", 5);
         K_OptionData.Set<float>("Separate", separate [0]);
         K_OptionData.Set<int>("PokerRule", pokerRule ? 1 : 0);
+
     }
 
     void OnGUI()
     {
-
         if (!OnScreen)
             return;
 
@@ -237,5 +236,6 @@ public class K_DevelopOption : SingletonInGame<K_DevelopOption>
             K_OptionData.Set<float>("Separate", separate [0]);
             K_OptionData.Set<int>("PokerRule", pokerRule ? 1 : 0);
         }
+
     }
 }
