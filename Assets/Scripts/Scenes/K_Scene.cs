@@ -18,9 +18,9 @@ public class K_Scene : MonoSingleton<K_Scene>
         K_SceneManager.SwitchScene("Option");
     }
 
-    public void GoRanking()
+    public void GoRank()
     {
-        K_SceneManager.SwitchScene("Ranking");
+        K_SceneManager.SwitchScene("Rank");
     }
 }
     

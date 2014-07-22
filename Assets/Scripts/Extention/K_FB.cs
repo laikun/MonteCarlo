@@ -11,6 +11,25 @@ public class K_FB : SingletonInGame<K_FB>
 
     public bool IsInit {private set; get;}
 
+    public class UserScore
+    {
+        public int score { private set; get; }
+        public string id { private set; get; }
+        public string name { private set; get; }
+
+        public UserScore(Dictionary<string, object> fbData)
+        {
+            this.score = int.Parse(fbData["score"].ToString());
+            var user = fbData["user"] as Dictionary<string, object>;
+            this.id = user["id"] as string;
+            this.name = user["name"] as string;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="act"></param>
     public void FBdigest(Action act)
     {
         // (페이스북)로그인 여부 체크
@@ -23,7 +42,7 @@ public class K_FB : SingletonInGame<K_FB>
                 {
                     this.FBlog("FB.Login CallBack");
 
-                    if (r.Error == null && FB.IsLoggedIn)
+                    if (ResultCheck(r))
                         act();
                 });
             }, b => this.FBlog("Is game showing? " + b));
@@ -31,6 +50,23 @@ public class K_FB : SingletonInGame<K_FB>
         else
         {
             act();
+        }
+    }
+
+    public bool ResultCheck (FBResult result)
+    {
+        if (result.Error != null) {
+            K_Report.FBlog("Error Response:\n" + result.Error);
+            return false;
+        }
+        else if (!FB.IsLoggedIn)
+        {
+            K_Report.FBlog("Not LoggedOn!");
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 

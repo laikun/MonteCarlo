@@ -46,7 +46,6 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Examples\Scripts\InteractiveConsole.cs" />
      <Compile Include="Assets\Facebook\Scripts\AndroidFacebook.cs" />
      <Compile Include="Assets\Facebook\Scripts\AndroidFacebookLoader.cs" />
      <Compile Include="Assets\Facebook\Scripts\CanvasFacebookLoader.cs" />
@@ -196,14 +195,13 @@
      <Compile Include="Assets\Scripts\Extention\K_CameraFade.cs" />
      <Compile Include="Assets\Scripts\Extention\K_CameraManager.cs" />
      <Compile Include="Assets\Scripts\Extention\K_Extension.cs" />
+     <Compile Include="Assets\Scripts\Extention\K_FB.cs" />
      <Compile Include="Assets\Scripts\Extention\K_Flag.cs" />
-     <Compile Include="Assets\Scripts\Extention\K_LogOn.cs" />
      <Compile Include="Assets\Scripts\Extention\K_ReadyToWork.cs" />
      <Compile Include="Assets\Scripts\Extention\K_Report.cs" />
      <Compile Include="Assets\Scripts\Extention\K_Singleton.cs" />
      <Compile Include="Assets\Scripts\Extention\K_TimeCurve.cs" />
      <Compile Include="Assets\Scripts\K_GUITextInSprite.cs" />
-     <Compile Include="Assets\Scripts\K_GameState.cs" />
      <Compile Include="Assets\Scripts\K_SandBox.cs" />
      <Compile Include="Assets\Scripts\K_UIClick.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_Cell.cs" />
@@ -213,9 +211,12 @@
      <Compile Include="Assets\Scripts\MonteCarlo\K_DevelopOption.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_ElapsedTime.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_Foundation.cs" />
+     <Compile Include="Assets\Scripts\MonteCarlo\K_GameState.cs" />
+     <Compile Include="Assets\Scripts\MonteCarlo\K_NamePlate.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_OptionData.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_PlayingCard.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_PlayingCardManager.cs" />
+     <Compile Include="Assets\Scripts\MonteCarlo\K_Rank.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_Rule.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_Score.cs" />
      <Compile Include="Assets\Scripts\MonteCarlo\K_SubWindow.cs" />

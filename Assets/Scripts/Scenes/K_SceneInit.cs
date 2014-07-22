@@ -13,6 +13,6 @@ public class K_SceneInit : MonoSingleton<K_SceneInit>
     {
         yield return new WaitForSeconds(1f);
         K_SceneManager.SwitchScene("Title");
-        K_FB logOn = K_FB.Instance;
+        K_FB.Instance.FBdigest(() => { });
     }
 }

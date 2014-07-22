@@ -332,6 +332,7 @@ public class K_Rule : MonoSingleton<K_Rule>
         playOver();
 
         K_SubWindow.Instance.PopUp("GameClear");
+        K_Score.Instance.Record();
 
         yield break;
     }
