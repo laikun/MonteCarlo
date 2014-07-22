@@ -1,15 +1,14 @@
-﻿using System;
+using UnityEngine;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using UnityEngine;
-using System.Collections;
 
-public class K_LogOn : SingletonInGame<K_LogOn>
+public sealed class InteractiveConsole : MonoBehaviour
 {
     #region FB.Init() example
 
-    public bool IsInit {private set; get;}
+    private bool isInit = false;
 
     private void CallFBInit()
     {
@@ -19,7 +18,7 @@ public class K_LogOn : SingletonInGame<K_LogOn>
     private void OnInitComplete()
     {
         Debug.Log("FB.Init completed: Is user logged in? " + FB.IsLoggedIn);
-        IsInit = true;
+        isInit = true;
     }
 
     private void OnHideUnity(bool isGameShown)
@@ -29,7 +28,7 @@ public class K_LogOn : SingletonInGame<K_LogOn>
 
     #endregion
 
-    #region FB.Login() example 
+    #region FB.Login() example
 
     private void CallFBLogin()
     {
@@ -256,11 +255,11 @@ public class K_LogOn : SingletonInGame<K_LogOn>
         if (CenterHorizontal && CenterVertical)
         {
             FB.Canvas.SetResolution(width, height, false, 0, FBScreen.CenterVertical(), FBScreen.CenterHorizontal());
-        }
-        else if (CenterHorizontal)
+        } 
+        else if (CenterHorizontal) 
         {
             FB.Canvas.SetResolution(width, height, false, 0, FBScreen.Top(top), FBScreen.CenterHorizontal());
-        }
+        } 
         else if (CenterVertical)
         {
             FB.Canvas.SetResolution(width, height, false, 0, FBScreen.CenterVertical(), FBScreen.Left(left));
@@ -299,12 +298,12 @@ public class K_LogOn : SingletonInGame<K_LogOn>
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8
             return IsHorizontalLayout() ? Screen.height : 85;
 #else
-            return Screen.height;
+        return Screen.height;
 #endif
         }
     }
 
-    protected override void awake()
+    void Awake()
     {
         textStyle.alignment = TextAnchor.UpperLeft;
         textStyle.wordWrap = true;
@@ -335,7 +334,7 @@ public class K_LogOn : SingletonInGame<K_LogOn>
 
         scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.MinWidth(mainWindowFullWidth));
         GUILayout.BeginVertical();
-        GUI.enabled = !IsInit;
+        GUI.enabled = !isInit;
         if (Button("FB.Init"))
         {
             CallFBInit();
@@ -344,7 +343,7 @@ public class K_LogOn : SingletonInGame<K_LogOn>
 
         GUILayout.BeginHorizontal();
 
-        GUI.enabled = IsInit;
+        GUI.enabled = isInit;
         if (Button("Login"))
         {
             CallFBLogin();
@@ -509,7 +508,7 @@ public class K_LogOn : SingletonInGame<K_LogOn>
             string.Format(
                 " AppId: {0} \n Facebook Dll: {1} \n UserId: {2}\n IsLoggedIn: {3}\n AccessToken: {4}\n AccessTokenExpiresAt: {5}\n {6}",
                 FB.AppId,
-                (IsInit) ? "Loaded Successfully" : "Not Loaded",
+                (isInit) ? "Loaded Successfully" : "Not Loaded",
                 FB.UserId,
                 FB.IsLoggedIn,
                 FB.AccessToken,
@@ -548,7 +547,7 @@ public class K_LogOn : SingletonInGame<K_LogOn>
         }
     }
 
-    private IEnumerator TakeScreenshot()
+    private IEnumerator TakeScreenshot() 
     {
         yield return new WaitForEndOfFrame();
 
@@ -570,8 +569,8 @@ public class K_LogOn : SingletonInGame<K_LogOn>
     private bool Button(string label)
     {
         return GUILayout.Button(
-          label,
-          GUILayout.MinHeight(buttonHeight),
+          label, 
+          GUILayout.MinHeight(buttonHeight), 
           GUILayout.MaxWidth(mainWindowWidth)
         );
     }
@@ -594,5 +593,4 @@ public class K_LogOn : SingletonInGame<K_LogOn>
     }
 
     #endregion
-
 }

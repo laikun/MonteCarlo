@@ -3,6 +3,9 @@ using System.Collections;
 
 public class K_SceneManager : SingletonInGame<K_SceneManager>
 {
+    // K. 0722 지난(前) 신
+    private string prevSceneName;
+
     private string currentSceneName;
     private string nextSceneName;
     private AsyncOperation resourceUnloadTask;
@@ -24,12 +27,24 @@ public class K_SceneManager : SingletonInGame<K_SceneManager>
 
     private UpdateDelegate[] updateDelegates;
 
+    /// <summary>
+    /// K. 0722 지난 신으로 돌아가기
+    /// </summary>
+    public static void PrevScene()
+    {
+        Debug.Log("<color=teal><b>[PrevScene]</b> : " + K_SceneManager.Instance.currentSceneName + " => " + K_SceneManager.Instance.prevSceneName + "</color>");
+        if (K_SceneManager.Instance.currentSceneName != K_SceneManager.Instance.prevSceneName)
+        {
+            K_SceneManager.Instance.nextSceneName = K_SceneManager.Instance.prevSceneName;
+        }
+    }
+
     //--------------------------------------------------------------------------
     // public static methods
     //--------------------------------------------------------------------------
     public static void SwitchScene(string nextSceneName)
     {
-        Debug.Log("<color=teal>[00] SwitchScene : " + K_SceneManager.Instance.currentSceneName + " => " + nextSceneName + "</color>");
+        Debug.Log("<color=teal><b>[SwitchScene]</b> : " + K_SceneManager.Instance.currentSceneName + " => " + nextSceneName + "</color>");
         if (K_SceneManager.Instance.currentSceneName != nextSceneName)
         {
             K_SceneManager.Instance.nextSceneName = nextSceneName;
@@ -78,7 +93,7 @@ public class K_SceneManager : SingletonInGame<K_SceneManager>
             updateDelegates [(int)sceneState]();
         }
 
-        // sync level load
+        // K. 0715 sync level load
         if (Application.isLoadingLevel)
             isLoadingLevel = true;
     }
@@ -97,6 +112,8 @@ public class K_SceneManager : SingletonInGame<K_SceneManager>
     // handle anything that needs to happen before loading
     private void UpdateScenePreload()
     {
+        // K. 0722
+        prevSceneName = currentSceneName;
 //        sceneLoadTask = Application.LoadLevelAsync(nextSceneName);
         Application.LoadLevel(nextSceneName);
         

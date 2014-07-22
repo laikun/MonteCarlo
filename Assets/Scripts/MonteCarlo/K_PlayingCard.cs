@@ -24,7 +24,7 @@ public class K_PlayingCard : K_ReadyToWork, IComparable<K_PlayingCard>
         }
     }
 
-    Animator anim;
+    public Animator Anim { private set; get; }
  
     public K_PlayingCard SetCard(string str, int num, Texture texture)
     {
@@ -38,7 +38,7 @@ public class K_PlayingCard : K_ReadyToWork, IComparable<K_PlayingCard>
         mat.mainTexture = texture;
         front.renderer.material = mat;
 
-        this.anim = this.transform.FindChild("Card").GetComponent<Animator>();
+        this.Anim = this.transform.GetComponentInChildren<Animator>();
 
         return this;
     }
@@ -88,12 +88,12 @@ public class K_PlayingCard : K_ReadyToWork, IComparable<K_PlayingCard>
     IEnumerator Play(string name)
     {
         IsPlaying = true;
-        anim.Play(name);
+        Anim.Play(name);
 
         do
         {
             yield return null;
-        } while (anim.GetCurrentAnimatorStateInfo(0).IsName(name));
+        } while (Anim.GetCurrentAnimatorStateInfo(0).IsName(name));
 
         IsPlaying = false;
         yield break;

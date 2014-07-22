@@ -22,7 +22,7 @@ public class K_Rule : MonoSingleton<K_Rule>
     /// </summary>
     public void NewGame()
     {
-        K_Report.Log("<b>" + name + "</b> : NewGame");
+        this.Log("NewGame");
 
         K_CameraManager.Instance.EventActive(false);
 
@@ -40,7 +40,7 @@ public class K_Rule : MonoSingleton<K_Rule>
         // 카드 이벤트 리셋
         K_PlayingCardManager.Instance.Cards.ForEach(c =>
         {
-            c.SendMessage("Play", "Closed");
+            c.Anim.Play("Closed");
             UIEventListener.Get(c.gameObject).onClick = null;
         });
 
@@ -61,10 +61,10 @@ public class K_Rule : MonoSingleton<K_Rule>
     /// <returns></returns>
     public void Play()
     {
-        K_Report.Log("<b>" + name + "</b> : Play");
+        this.Log("Play");
 
         K_SubWindow.Instance.Disapear();
-        K_PlayingCardManager.Instance.Cards.ForEach(c => c.SendMessage("Play", "Open"));
+        K_PlayingCardManager.Instance.Cards.ForEach(c => c.Anim.Play("Open"));
         K_Deck.Instance.SendMessage("ShowNextCard");
 
         // 게임오버체크
@@ -157,7 +157,7 @@ public class K_Rule : MonoSingleton<K_Rule>
     /// <returns></returns>
     public bool Select(K_PlayingCard card)
     {
-        K_Report.Log("<color=blue><b>" + name + "</b> : Select</color> (" + card.name + ")\n");
+        this.Log("Select (" + card.name + ")", "blue");
 
         // 파라메터 에러
         if (card == null)
@@ -168,7 +168,7 @@ public class K_Rule : MonoSingleton<K_Rule>
             return false;
 
         // 카드 선택 애니메이션
-        card.SendMessage("Play", "Select");
+        card.Anim.Play("Select");
         selectedCards.Add(card);
 
         // 두 장 미만은 조합 무의미
@@ -179,7 +179,7 @@ public class K_Rule : MonoSingleton<K_Rule>
         {
             selectedCards.Clear();
             selectedCards.Add(card);
-            K_Cell.Instance.Cards.Where(x => !x.Equals(card)).ForEach(x => x.SendMessage("Play", "Opened"));
+            K_Cell.Instance.Cards.Where(x => !x.Equals(card)).ForEach(x => x.Anim.Play("Opened"));
         };
 
         K_PlayingCard[] target = selectedCards.OrderBy(c => c).ToArray();
@@ -212,7 +212,7 @@ public class K_Rule : MonoSingleton<K_Rule>
 
         combi.ToArray().ForEach(c =>
         {
-            c.SendMessage("Play", "SetOff");
+            c.Anim.Play("SetOff");
             UIEventListener.Get(c.gameObject).onClick = null;
         });
         selectedCards.Clear();
@@ -274,7 +274,7 @@ public class K_Rule : MonoSingleton<K_Rule>
     #region Draw
     public void Draw()
     {
-        K_Report.Log("<color=blue><b>" + name + "</b> : Draw</color>");
+        this.Log("Draw");
 
         if (K_Flag.State("InPlay") != 1)
             return;
@@ -290,7 +290,7 @@ public class K_Rule : MonoSingleton<K_Rule>
         K_Cell.Instance.LoadToCell(K_Deck.Instance.Draws(K_Cell.Instance.BlankCellCount));
         // 셀 채움 애니메이션
         K_Cell.Instance.SendMessage("goToCell", 0.05f);
-        K_Cell.Instance.Cards.ForEach(c => c.SendMessage("Play", "Opened"));
+        K_Cell.Instance.Cards.ForEach(c => c.Anim.Play("Opened"));
         // 선택된 카드 리셋
         selectedCards.Clear();
         // 게임오버 체크
@@ -332,6 +332,7 @@ public class K_Rule : MonoSingleton<K_Rule>
         playOver();
 
         K_SubWindow.Instance.PopUp("GameClear");
+        K_Score.Instance.Record();
 
         yield break;
     }
@@ -430,11 +431,6 @@ public class K_Rule : MonoSingleton<K_Rule>
     #region OnGUI
     void OnGUI()
     {
-        if (selectedCards.Count > 0)
-        {
-            GUI.Box(new Rect(0, Screen.height - 40, 50, 30), "" + selectedCards.ToArray().ToString<K_PlayingCard>());
-        }
-
         // Pair Guide
         if (combinations.Count > 0 && K_Flag.State("InPlay") == 1)
         {

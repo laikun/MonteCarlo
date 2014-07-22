@@ -55,56 +55,36 @@ public class K_Deck : MonoSingleton<K_Deck>
         return cards;
     }
 
+    ////////////////////////////////////////////////////////
+
     public void NeedForDraw()
     {
-        if (K_OptionData.Get<int>("AutoDraw") == 1)
-            return;
+        //if (K_OptionData.Get<int>("AutoDraw") == 1)
+        //    return;
 
-        if (cardsInDeck.Count() < 1)
-        {
-            anim.Play("PickMe");
-            UIEventListener.Get(this.gameObject).onClick = g =>
-            {
-                anim.Play("Opened");
-                K_Rule.Instance.SendMessage("Draw");
-            };
-        }
-        else
-        {
-            GameObject go = cardsInDeck.First().gameObject;
-            go.SendMessage("Play", "PickMe");
-            UIEventListener.Get(cardsInDeck.First().gameObject).onClick = g =>
-            {
-                g.SendMessage("Play", "Opened");
-                K_Rule.Instance.SendMessage("Draw");
-            };
-        }
+        Animator a = cardsInDeck.Count() < 1 ? this.anim : cardsInDeck.First().Anim;
+        a.Play("PickMe");
+        UIEventListener.Get(a.gameObject).onClick = g => K_Rule.Instance.SendMessage("Draw");
     }
-    ////////////////////////////////////////////////////////
 
     public void ShowNextCard()
     {
-        K_Report.Log("<color=blue><b>" + name + "</b> : ShowNextCard</color> \n");
-
-        int r = Mathf.Min(2, cardsInDeck.Count());
-        for (int i = 0; i < r; i++)
-        {
-            K_PlayingCard card = cardsInDeck.ElementAt(i);
-
-            UIEventListener.Get(card.gameObject).onClick = g => K_Rule.Instance.Draw();
-
-            card.AddPosition(new Vector3(transform.position.x, transform.position.y - (r - i) * 0.12f, card.transform.position.z), 1f, NormalCurve.Ease.In);
-            card.GoWork();
-        }
+        this.Log("ShowNextCard");
 
         if (cardsInDeck.Count() < 1)
-            UIEventListener.Get(gameObject).onClick = g => K_Rule.Instance.Draw();
+            return;
+
+        cardsInDeck.Take(Mathf.Min(3, cardsInDeck.Count())).Reverse().ForEach((c, i) => {
+            UIEventListener.Get(c.gameObject).onClick = g => K_Rule.Instance.Draw();
+            c.AddPosition(new Vector3(transform.position.x, transform.position.y - i * 0.12f, c.transform.position.z), 1f, NormalCurve.Ease.In);
+            c.GoWork();
+        });
     }
 
     // ReDeck
     IEnumerator Shuffle(K_PlayingCard[] cards)
     {
-        K_Report.Log(name + " : Shuffle");
+        this.Log("Shuffle");
 
         //Func<float, float, float> r = (n, m) => UnityEngine.Random.Range(n, m);
         //Action<K_PlayingCard, K_Deck> w = (c, d) =>
