@@ -5,26 +5,55 @@ using System.Text;
 using UnityEngine;
 using System.Collections;
 
-public class K_LogOn : SingletonInGame<K_LogOn>
+public class K_FB : SingletonInGame<K_FB>
 {
     #region FB.Init() example
 
     public bool IsInit {private set; get;}
 
-    private void CallFBInit()
+    public void FBdigest(Action act)
     {
+        // (페이스북)로그인 여부 체크
+        if (!FB.IsLoggedIn)
+        {
+            FB.Init(() =>
+            {
+                this.FBlog("FB.Init completed, FB.Login Start.");
+                FB.Login("email,publish_actions", r =>
+                {
+                    this.FBlog("FB.Login CallBack");
+
+                    if (r.Error == null && FB.IsLoggedIn)
+                        act();
+                });
+            }, b => this.FBlog("Is game showing? " + b));
+        }
+        else
+        {
+            act();
+        }
+    }
+
+    public void CallFBInit()
+    {
+        if (IsInit)
+            return;
+
+        this.FBlog("CallFBInit");
         FB.Init(OnInitComplete, OnHideUnity);
     }
 
     private void OnInitComplete()
     {
-        Debug.Log("FB.Init completed: Is user logged in? " + FB.IsLoggedIn);
+        this.FBlog("FB.Init completed: Is user logged in? " + FB.IsLoggedIn);
         IsInit = true;
+
+        CallFBLogin();
     }
 
     private void OnHideUnity(bool isGameShown)
     {
-        Debug.Log("Is game showing? " + isGameShown);
+        this.FBlog("Is game showing? " + isGameShown);
     }
 
     #endregion
@@ -33,11 +62,14 @@ public class K_LogOn : SingletonInGame<K_LogOn>
 
     private void CallFBLogin()
     {
+        this.FBlog("CallFBLogin");
         FB.Login("email,publish_actions", LoginCallback);
     }
 
     void LoginCallback(FBResult result)
     {
+        string lastResponse;
+
         if (result.Error != null)
             lastResponse = "Error Response:\n" + result.Error;
         else if (!FB.IsLoggedIn)
@@ -48,10 +80,13 @@ public class K_LogOn : SingletonInGame<K_LogOn>
         {
             lastResponse = "Login was successful!";
         }
+
+        this.FBlog(lastResponse);
     }
 
     private void CallFBLogout()
     {
+        this.FBlog("CallFBLogout");
         FB.Logout();
     }
     #endregion
@@ -316,222 +351,229 @@ public class K_LogOn : SingletonInGame<K_LogOn>
         FeedProperties.Add("key2", new[] { "valueString2", "http://www.facebook.com" });
     }
 
-    void OnGUI()
+    protected override void onDestroy()
     {
-        if (IsHorizontalLayout())
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.BeginVertical();
-        }
-        GUILayout.Space(5);
-        GUILayout.Box("Status: " + status, GUILayout.MinWidth(mainWindowWidth));
-
-#if UNITY_IOS || UNITY_ANDROID || UNITY_WP8
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
-        {
-            scrollPosition.y += Input.GetTouch(0).deltaPosition.y;
-        }
-#endif
-
-        scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.MinWidth(mainWindowFullWidth));
-        GUILayout.BeginVertical();
-        GUI.enabled = !IsInit;
-        if (Button("FB.Init"))
-        {
-            CallFBInit();
-            status = "FB.Init() called with " + FB.AppId;
-        }
-
-        GUILayout.BeginHorizontal();
-
-        GUI.enabled = IsInit;
-        if (Button("Login"))
-        {
-            CallFBLogin();
-            status = "Login called";
-        }
-
-#if UNITY_IOS || UNITY_ANDROID || UNITY_WP8
-        GUI.enabled = FB.IsLoggedIn;
-        if (Button("Logout"))
-        {
-            CallFBLogout();
-            status = "Logout called";
-        }
-        GUI.enabled = isInit;
-#endif
-        GUILayout.EndHorizontal();
-
-#if UNITY_IOS || UNITY_ANDROID
-        if (Button("Publish Install"))
-        {
-            CallFBPublishInstall();
-            status = "Install Published";
-        }
-#endif
-
-        GUI.enabled = FB.IsLoggedIn;
-        GUILayout.Space(10);
-        LabelAndTextField("Title (optional): ", ref FriendSelectorTitle);
-        LabelAndTextField("Message: ", ref FriendSelectorMessage);
-        LabelAndTextField("Exclude Ids (optional): ", ref FriendSelectorExcludeIds);
-        LabelAndTextField("Filters (optional): ", ref FriendSelectorFilters);
-        LabelAndTextField("Max Recipients (optional): ", ref FriendSelectorMax);
-        LabelAndTextField("Data (optional): ", ref FriendSelectorData);
-        if (Button("Open Friend Selector"))
-        {
-            try
-            {
-                CallAppRequestAsFriendSelector();
-                status = "Friend Selector called";
-            }
-            catch (Exception e)
-            {
-                status = e.Message;
-            }
-        }
-        GUILayout.Space(10);
-        LabelAndTextField("Title (optional): ", ref DirectRequestTitle);
-        LabelAndTextField("Message: ", ref DirectRequestMessage);
-        LabelAndTextField("To Comma Ids: ", ref DirectRequestTo);
-        if (Button("Open Direct Request"))
-        {
-            try
-            {
-                CallAppRequestAsDirectRequest();
-                status = "Direct Request called";
-            }
-            catch (Exception e)
-            {
-                status = e.Message;
-            }
-        }
-        GUILayout.Space(10);
-        LabelAndTextField("To Id (optional): ", ref FeedToId);
-        LabelAndTextField("Link (optional): ", ref FeedLink);
-        LabelAndTextField("Link Name (optional): ", ref FeedLinkName);
-        LabelAndTextField("Link Desc (optional): ", ref FeedLinkDescription);
-        LabelAndTextField("Link Caption (optional): ", ref FeedLinkCaption);
-        LabelAndTextField("Picture (optional): ", ref FeedPicture);
-        LabelAndTextField("Media Source (optional): ", ref FeedMediaSource);
-        LabelAndTextField("Action Name (optional): ", ref FeedActionName);
-        LabelAndTextField("Action Link (optional): ", ref FeedActionLink);
-        LabelAndTextField("Reference (optional): ", ref FeedReference);
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Properties (optional)", GUILayout.Width(150));
-        IncludeFeedProperties = GUILayout.Toggle(IncludeFeedProperties, "Include");
-        GUILayout.EndHorizontal();
-        if (Button("Open Feed Dialog"))
-        {
-            try
-            {
-                CallFBFeed();
-                status = "Feed dialog called";
-            }
-            catch (Exception e)
-            {
-                status = e.Message;
-            }
-        }
-        GUILayout.Space(10);
-
-#if UNITY_WEBPLAYER
-        LabelAndTextField("Product: ", ref PayProduct);
-        if (Button("Call Pay"))
-        {
-            CallFBPay();
-        }
-        GUILayout.Space(10);
-#endif
-
-        LabelAndTextField("API: ", ref ApiQuery);
-        if (Button("Call API"))
-        {
-            status = "API called";
-            CallFBAPI();
-        }
-        GUILayout.Space(10);
-        if (Button("Take & upload screenshot"))
-        {
-            status = "Take screenshot";
-
-            StartCoroutine(TakeScreenshot());
-        }
-
-        if (Button("Get Deep Link"))
-        {
-            CallFBGetDeepLink();
-        }
-#if UNITY_IOS || UNITY_ANDROID
-        if (Button("Log FB App Event"))
-        {
-            status = "Logged FB.AppEvent";
-            CallAppEventLogEvent();
-        }
-#endif
-
-#if UNITY_WEBPLAYER
-        GUILayout.Space(10);
-
-        LabelAndTextField("Game Width: ", ref Width);
-        LabelAndTextField("Game Height: ", ref Height);
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Center Game:", GUILayout.Width(150));
-        CenterVertical = GUILayout.Toggle(CenterVertical, "Vertically");
-        CenterHorizontal = GUILayout.Toggle(CenterHorizontal, "Horizontally");
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal();
-        LabelAndTextField("or set Padding Top: ", ref Top);
-        LabelAndTextField("set Padding Left: ", ref Left);
-        GUILayout.EndHorizontal();
-        if (Button("Set Resolution"))
-        {
-            status = "Set to new Resolution";
-            CallCanvasSetResolution();
-        }
-#endif
-
-        GUILayout.Space(10);
-
-        GUILayout.EndVertical();
-        GUILayout.EndScrollView();
-
-        if (IsHorizontalLayout())
-        {
-            GUILayout.EndVertical();
-        }
-        GUI.enabled = true;
-
-        var textAreaSize = GUILayoutUtility.GetRect(640, TextWindowHeight);
-
-        GUI.TextArea(
-            textAreaSize,
-            string.Format(
-                " AppId: {0} \n Facebook Dll: {1} \n UserId: {2}\n IsLoggedIn: {3}\n AccessToken: {4}\n AccessTokenExpiresAt: {5}\n {6}",
-                FB.AppId,
-                (IsInit) ? "Loaded Successfully" : "Not Loaded",
-                FB.UserId,
-                FB.IsLoggedIn,
-                FB.AccessToken,
-                FB.AccessTokenExpiresAt,
-                lastResponse
-            ), textStyle);
-
-        if (lastResponseTexture != null)
-        {
-            var texHeight = textAreaSize.y + 200;
-            if (Screen.height - lastResponseTexture.height < texHeight)
-            {
-                texHeight = Screen.height - lastResponseTexture.height;
-            }
-            GUI.Label(new Rect(textAreaSize.x + 5, texHeight, lastResponseTexture.width, lastResponseTexture.height), lastResponseTexture);
-        }
-
-        if (IsHorizontalLayout())
-        {
-            GUILayout.EndHorizontal();
-        }
+        CallFBLogout();
     }
+
+//    void OnGUI()
+//    {
+//        return;
+
+//        if (IsHorizontalLayout())
+//        {
+//            GUILayout.BeginHorizontal();
+//            GUILayout.BeginVertical();
+//        }
+//        GUILayout.Space(5);
+//        GUILayout.Box("Status: " + status, GUILayout.MinWidth(mainWindowWidth));
+
+//#if UNITY_IOS || UNITY_ANDROID || UNITY_WP8
+//        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+//        {
+//            scrollPosition.y += Input.GetTouch(0).deltaPosition.y;
+//        }
+//#endif
+
+//        scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.MinWidth(mainWindowFullWidth));
+//        GUILayout.BeginVertical();
+//        GUI.enabled = !IsInit;
+//        if (Button("FB.Init"))
+//        {
+//            CallFBInit();
+//            status = "FB.Init() called with " + FB.AppId;
+//        }
+
+//        GUILayout.BeginHorizontal();
+
+//        GUI.enabled = IsInit;
+//        if (Button("Login"))
+//        {
+//            CallFBLogin();
+//            status = "Login called";
+//        }
+
+//#if UNITY_IOS || UNITY_ANDROID || UNITY_WP8
+//        GUI.enabled = FB.IsLoggedIn;
+//        if (Button("Logout"))
+//        {
+//            CallFBLogout();
+//            status = "Logout called";
+//        }
+//        GUI.enabled = IsInit;
+//#endif
+//        GUILayout.EndHorizontal();
+
+//#if UNITY_IOS || UNITY_ANDROID
+//        if (Button("Publish Install"))
+//        {
+//            CallFBPublishInstall();
+//            status = "Install Published";
+//        }
+//#endif
+
+//        GUI.enabled = FB.IsLoggedIn;
+//        GUILayout.Space(10);
+//        LabelAndTextField("Title (optional): ", ref FriendSelectorTitle);
+//        LabelAndTextField("Message: ", ref FriendSelectorMessage);
+//        LabelAndTextField("Exclude Ids (optional): ", ref FriendSelectorExcludeIds);
+//        LabelAndTextField("Filters (optional): ", ref FriendSelectorFilters);
+//        LabelAndTextField("Max Recipients (optional): ", ref FriendSelectorMax);
+//        LabelAndTextField("Data (optional): ", ref FriendSelectorData);
+//        if (Button("Open Friend Selector"))
+//        {
+//            try
+//            {
+//                CallAppRequestAsFriendSelector();
+//                status = "Friend Selector called";
+//            }
+//            catch (Exception e)
+//            {
+//                status = e.Message;
+//            }
+//        }
+//        GUILayout.Space(10);
+//        LabelAndTextField("Title (optional): ", ref DirectRequestTitle);
+//        LabelAndTextField("Message: ", ref DirectRequestMessage);
+//        LabelAndTextField("To Comma Ids: ", ref DirectRequestTo);
+//        if (Button("Open Direct Request"))
+//        {
+//            try
+//            {
+//                CallAppRequestAsDirectRequest();
+//                status = "Direct Request called";
+//            }
+//            catch (Exception e)
+//            {
+//                status = e.Message;
+//            }
+//        }
+//        GUILayout.Space(10);
+//        LabelAndTextField("To Id (optional): ", ref FeedToId);
+//        LabelAndTextField("Link (optional): ", ref FeedLink);
+//        LabelAndTextField("Link Name (optional): ", ref FeedLinkName);
+//        LabelAndTextField("Link Desc (optional): ", ref FeedLinkDescription);
+//        LabelAndTextField("Link Caption (optional): ", ref FeedLinkCaption);
+//        LabelAndTextField("Picture (optional): ", ref FeedPicture);
+//        LabelAndTextField("Media Source (optional): ", ref FeedMediaSource);
+//        LabelAndTextField("Action Name (optional): ", ref FeedActionName);
+//        LabelAndTextField("Action Link (optional): ", ref FeedActionLink);
+//        LabelAndTextField("Reference (optional): ", ref FeedReference);
+//        GUILayout.BeginHorizontal();
+//        GUILayout.Label("Properties (optional)", GUILayout.Width(150));
+//        IncludeFeedProperties = GUILayout.Toggle(IncludeFeedProperties, "Include");
+//        GUILayout.EndHorizontal();
+//        if (Button("Open Feed Dialog"))
+//        {
+//            try
+//            {
+//                CallFBFeed();
+//                status = "Feed dialog called";
+//            }
+//            catch (Exception e)
+//            {
+//                status = e.Message;
+//            }
+//        }
+//        GUILayout.Space(10);
+
+//#if UNITY_WEBPLAYER
+//        LabelAndTextField("Product: ", ref PayProduct);
+//        if (Button("Call Pay"))
+//        {
+//            CallFBPay();
+//        }
+//        GUILayout.Space(10);
+//#endif
+
+//        LabelAndTextField("API: ", ref ApiQuery);
+//        if (Button("Call API"))
+//        {
+//            status = "API called";
+//            CallFBAPI();
+//        }
+//        GUILayout.Space(10);
+//        if (Button("Take & upload screenshot"))
+//        {
+//            status = "Take screenshot";
+
+//            StartCoroutine(TakeScreenshot());
+//        }
+
+//        if (Button("Get Deep Link"))
+//        {
+//            CallFBGetDeepLink();
+//        }
+//#if UNITY_IOS || UNITY_ANDROID
+//        if (Button("Log FB App Event"))
+//        {
+//            status = "Logged FB.AppEvent";
+//            CallAppEventLogEvent();
+//        }
+//#endif
+
+//#if UNITY_WEBPLAYER
+//        GUILayout.Space(10);
+
+//        LabelAndTextField("Game Width: ", ref Width);
+//        LabelAndTextField("Game Height: ", ref Height);
+//        GUILayout.BeginHorizontal();
+//        GUILayout.Label("Center Game:", GUILayout.Width(150));
+//        CenterVertical = GUILayout.Toggle(CenterVertical, "Vertically");
+//        CenterHorizontal = GUILayout.Toggle(CenterHorizontal, "Horizontally");
+//        GUILayout.EndHorizontal();
+//        GUILayout.BeginHorizontal();
+//        LabelAndTextField("or set Padding Top: ", ref Top);
+//        LabelAndTextField("set Padding Left: ", ref Left);
+//        GUILayout.EndHorizontal();
+//        if (Button("Set Resolution"))
+//        {
+//            status = "Set to new Resolution";
+//            CallCanvasSetResolution();
+//        }
+//#endif
+
+//        GUILayout.Space(10);
+
+//        GUILayout.EndVertical();
+//        GUILayout.EndScrollView();
+
+//        if (IsHorizontalLayout())
+//        {
+//            GUILayout.EndVertical();
+//        }
+//        GUI.enabled = true;
+
+//        var textAreaSize = GUILayoutUtility.GetRect(640, TextWindowHeight);
+
+//        GUI.TextArea(
+//            textAreaSize,
+//            string.Format(
+//                " AppId: {0} \n Facebook Dll: {1} \n UserId: {2}\n IsLoggedIn: {3}\n AccessToken: {4}\n AccessTokenExpiresAt: {5}\n {6}",
+//                FB.AppId,
+//                (IsInit) ? "Loaded Successfully" : "Not Loaded",
+//                FB.UserId,
+//                FB.IsLoggedIn,
+//                FB.AccessToken,
+//                FB.AccessTokenExpiresAt,
+//                lastResponse
+//            ), textStyle);
+
+//        if (lastResponseTexture != null)
+//        {
+//            var texHeight = textAreaSize.y + 200;
+//            if (Screen.height - lastResponseTexture.height < texHeight)
+//            {
+//                texHeight = Screen.height - lastResponseTexture.height;
+//            }
+//            GUI.Label(new Rect(textAreaSize.x + 5, texHeight, lastResponseTexture.width, lastResponseTexture.height), lastResponseTexture);
+//        }
+
+//        if (IsHorizontalLayout())
+//        {
+//            GUILayout.EndHorizontal();
+//        }
+//    }
 
     void Callback(FBResult result)
     {

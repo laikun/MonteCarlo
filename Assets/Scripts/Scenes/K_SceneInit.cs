@@ -12,6 +12,7 @@ public class K_SceneInit : MonoSingleton<K_SceneInit>
     IEnumerator Go()
     {
         yield return new WaitForSeconds(1f);
-        K_SceneManager.SwitchScene("Title"); 
+        K_SceneManager.SwitchScene("Title");
+        K_FB logOn = K_FB.Instance;
     }
 }

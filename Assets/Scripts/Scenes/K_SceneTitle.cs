@@ -3,7 +3,6 @@ using System.Collections;
 
 public class K_SceneTitle : K_Scene
 {
-
     public void GoStandard()
     {
         K_Flag.On("GameMode", 1);
