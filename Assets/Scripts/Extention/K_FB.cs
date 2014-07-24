@@ -28,7 +28,7 @@ public class K_FB : SingletonInGame<K_FB>
     /// 
     /// </summary>
     /// <param name="act"></param>
-    public void FBdigest(Action act)
+    public void FBdigest(Action act = null)
     {
         // (페이스북)로그인 여부 체크
         if (!FB.IsLoggedIn)

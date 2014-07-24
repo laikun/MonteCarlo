@@ -64,6 +64,18 @@ public static class ExtensionMethods
     }
 
     /// <summary>
+    /// flag가 참일 동안 대기 후 지정된 작업을 시행(즉시)
+    /// </summary>
+    /// <param name="mono"></param>
+    /// <param name="action">대기 후 실행 할 작업</param>
+    /// <param name="flag">대기 기준이 되는 작업</param>
+    /// <returns></returns>
+    public static void WorkDelayNow(this MonoBehaviour mono, Action<MonoBehaviour> action, Func<MonoBehaviour, bool> flag)
+    {
+        mono.StartCoroutine(WorkDelay(mono, action, flag));
+    }
+
+    /// <summary>
     /// flag가 참일 동안 대기 후 지정된 작업을 시행
     /// </summary>
     /// <param name="mono"></param>
@@ -157,6 +169,12 @@ public static class ExtensionMethods
     #endregion
 
     #region Set Position
+
+    public static Vector3 Position(this MonoBehaviour mono)
+    {
+        return mono.transform.position;
+    }
+
     public static Vector2 V2(this Vector3 v3)
     {
         return new Vector2(v3.x, v3.y);

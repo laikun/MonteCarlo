@@ -11,8 +11,10 @@ public static class K_Report {
 
     static void add(string str)
     {
+#if !UNITY_EDITOR
         if (K_ReportDebug.Instance != null)
             K_ReportDebug.Instance.Add(str);
+#endif
         log.AppendLine(System.DateTime.Now.ToShortTimeString() + " :: " + str);
     }
 
@@ -78,9 +80,11 @@ public class K_ReportDebug : SingletonInGame<K_ReportDebug>
         textStyle.clipping = TextClipping.Clip;
     }
 
+#if !UNITY_EDITOR
     void OnGUI()
     {
         GUI.Box(new Rect(0, Screen.height - 100, 600, 100), string.Join("\n", log.ToArray()), textStyle);
     }
+#endif
 }
     

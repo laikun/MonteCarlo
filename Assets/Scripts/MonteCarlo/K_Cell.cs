@@ -21,6 +21,8 @@ public class K_Cell : MonoSingleton<K_Cell>
 
     public int BlankCellCount { get { return cells.Count(cell => cell.card == null); } }
 
+    public bool OnPosition { get { return cells.Where(c => c.card != null).All(c => c.card.Position().V2() == c.position); } }
+
     #region logic
     public override void OnInitialize()
     {
@@ -58,18 +60,6 @@ public class K_Cell : MonoSingleton<K_Cell>
             cells[i].coordination = new Vector2(i % column, i / column);
             cells[i].position = new Vector2(px[(int)cells[i].coordination.x], py[(int)cells[i].coordination.y]);
         }
-    }
-
-    public void LoadToCell(IEnumerable<K_PlayingCard> cards = null)
-    {
-        K_Report.Log(name + " : LoadToCell");
-
-        if (cards == null)
-            cards = K_Deck.Instance.Draws(cells.Count(x => x.card == null));
-
-        cards = new K_PlayingCard[0].Concat(cells.Where(x => x.card != null).Select(x => x.card)).Concat(cards);
-        cards = cards.Concat(new K_PlayingCard[row * column - cards.Count()]);
-        cards.ForEach((c, i) => cells[i].card = c);
     }
 
     public void Remove(K_PlayingCard card)
@@ -157,13 +147,30 @@ public class K_Cell : MonoSingleton<K_Cell>
 
     #endregion
 
+    public void LoadToCell(IEnumerable<K_PlayingCard> cards = null)
+    {
+        K_Report.Log(name + " : LoadToCell");
+
+        if (cards == null)
+            cards = K_Deck.Instance.Draws(cells.Count(x => x.card == null));
+
+        cards = new K_PlayingCard[0].Concat(cells.Where(x => x.card != null).Select(x => x.card)).Concat(cards);
+        cards = cards.Concat(new K_PlayingCard[row * column - cards.Count()]);
+        cards.ForEach((c, i) => cells[i].card = c);
+    }
+
+    public void ToPosition()
+    {
+        cells.ForEach(c => c.card.transform.position = c.position.AttachZ(c.card.Position().z));
+    }
+
     IEnumerator goToCell(float delay = 0.03f)
     {
         K_Report.Log(name + " : goToCell");
 
         foreach (var card in cells.Where(cell => cell.card != null && cell.card.transform.position.V2() != cell.position).Select(c => c.card))
         {
-            StartCoroutine(this.goToCell(card));
+            StartCoroutine("goToCell", card);
             yield return new WaitForSeconds(delay);
         }
         yield break;
@@ -171,13 +178,14 @@ public class K_Cell : MonoSingleton<K_Cell>
 
     IEnumerator goToCell(K_PlayingCard card)
     {
-        Cell target = cells.First(c => c.card.Equals(card));
+        Cell target = cells.First(c => card.Equals(c.card));
 
-        if (target == null)
+        if (target == null || target.position == card.Position().V2())
             yield break;
 
-        if (target.position.AttachZ(card) != card.transform.position)
-            card.transform.position = target.position.AttachZ(card.transform.position.z);
+        Vector3 to = target.position.AttachZ(card.transform.position.z);
+
+        card.AddPosition(to, K_TimeCurve.EaseOut(Vector2.Distance(target.position, card.Position().V2()) * 0.2f)).GoWork();
 
         yield break;
     }

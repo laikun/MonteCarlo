@@ -31,10 +31,16 @@ public class K_Score : MonoSingleton<K_Score> {
                 return null;
         };
 
+
+#if !UNITY_EDITOR 
+        if (K_OptionData.Get<int>("FaceBook") != 1)
+            return;
+
         // 게임 하이스코어 취득
         K_FB.Instance.FBdigest(() => FB.API(FB.AppId + "/scores", Facebook.HttpMethod.GET, r => highUser = data(r)));
         // 플레이어 하이스코어 취득
-        K_FB.Instance.FBdigest(() => FB.API(FB.UserId + "/scores", Facebook.HttpMethod.GET, r => player = data(r)));
+        K_FB.Instance.FBdigest(() => FB.API(FB.UserId + "/scores", Facebook.HttpMethod.GET, r => player = data(r)));        
+#endif
     }
 
     public void Add(int score)
@@ -57,6 +63,11 @@ public class K_Score : MonoSingleton<K_Score> {
 
         var scoreData = new Dictionary<string, string>() { { "score", this.score.ToString() } };
 
+#if !UNITY_EDITOR
+        if (K_OptionData.Get<int>("FaceBook") != 1)
+            return;
+
         K_FB.Instance.FBdigest(() => FB.API("/me/scores", Facebook.HttpMethod.POST, r => this.FBlog("Record - Score Recorded"), scoreData));
+#endif
     }
 }

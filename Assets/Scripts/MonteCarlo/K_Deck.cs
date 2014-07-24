@@ -26,7 +26,7 @@ public class K_Deck : MonoSingleton<K_Deck>
 
         for (int i = 0; i < cards.Length; i++)
         {
-            cards[i].transform.position = new Vector3(transform.position.x, transform.position.y, (cards.Length - i) * -0.0001f);
+            cards[i].transform.position = new Vector3(transform.position.x, transform.position.y, (cards.Length - i + 1) * -0.0001f);
             cards[i].gameObject.StageIn();
         }
 
@@ -51,7 +51,7 @@ public class K_Deck : MonoSingleton<K_Deck>
             cards[i] = cardsInDeck.Dequeue();
         }
 
-        K_Report.Log("<color=blue><b>" + name + "</b> : Least Of Deck </color> \n" + cards.ToString<MonoBehaviour>());
+        K_Report.Log("<color=blue><b>" + name + "</b> : Left In Deck </color> \n" + cardsInDeck.ToArray().ToString<MonoBehaviour>());
         return cards;
     }
 
@@ -59,12 +59,24 @@ public class K_Deck : MonoSingleton<K_Deck>
 
     public void NeedForDraw()
     {
-        //if (K_OptionData.Get<int>("AutoDraw") == 1)
-        //    return;
-
-        Animator a = cardsInDeck.Count() < 1 ? this.anim : cardsInDeck.First().Anim;
-        a.Play("PickMe");
-        UIEventListener.Get(a.gameObject).onClick = g => K_Rule.Instance.SendMessage("Draw");
+        if (cardsInDeck.Count() < 1)
+        {
+            this.anim.Play("PickMe");
+            UIEventListener.Get(this.gameObject).onClick = g =>
+            {
+                K_Rule.Instance.SendMessage("Draw");
+                this.anim.Play("Opened");
+            };
+        }
+        else
+        {
+            K_PlayingCard card = cardsInDeck.First();
+            UIEventListener.Get(card.gameObject).onClick = g =>
+            {
+                K_Rule.Instance.SendMessage("Draw");
+                card.Anim.Play("Opened");
+            };
+        }
     }
 
     public void ShowNextCard()

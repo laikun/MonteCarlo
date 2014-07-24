@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class K_CameraManager : MonoSingleton<K_CameraManager> {
 
@@ -9,45 +10,52 @@ public class K_CameraManager : MonoSingleton<K_CameraManager> {
     private UICamera eventCamera;
     private Dictionary<UICamera, bool> activative = new Dictionary<UICamera, bool>(2);
 
+    int layerStage;
+    int layerGUI;
+
     public override void OnInitialize()
     {
-        uiCamera = GameObject.FindObjectsOfType<UICamera>().FirstOrDefault(x => x.tag.Equals("UICamera"));
+        layerGUI = LayerMask.NameToLayer("GUI");
+        layerStage = LayerMask.NameToLayer("Stage");
+
         eventCamera = Camera.main.GetComponent<UICamera>();
+    }
+
+    // 소인수분해
+    IEnumerable<int> factorization(int k)
+    {
+        if (k < 1)
+            return new int[0];
+        int y = 0;
+        while (Mathf.Pow(2, ++y) <= k) { }
+        return new int[] { --y }.Concat(factorization(k - (int)Mathf.Pow(2, y)));
     }
 
     public void AllEventActive(bool sw)
     {
-        if (!sw)
-        {
-            activative = new Dictionary<UICamera, bool>(2);
-            GameObject.FindObjectsOfType<UICamera>().ForEach(x => {
-                activative.Add(x, x.enabled);
-                x.enabled =false;
-                });
-        }
-        else
-        {
-            activative.Keys.ForEach(x => x.enabled = activative[x]);
-        }
+        IEnumerable<int> eventLayer = factorization(eventCamera.eventReceiverMask.value);
+
+        eventCamera.eventReceiverMask.value += (sw ? 1 : -1) * (eventLayer.Contains(layerStage) ? layerStage : 0);
+        eventCamera.eventReceiverMask.value += (sw ? 1 : -1) * (eventLayer.Contains(layerGUI) ? layerGUI : 0);
     }
 
-    public bool UIActive(bool sw)
+    public void UIActive(bool sw)
     {
-        if (uiCamera == null)
-            return false;
-
-        uiCamera.enabled = sw;
-
-        return true;
+        IEnumerable<int> eventLayer = factorization(eventCamera.eventReceiverMask.value);
+        eventCamera.eventReceiverMask.value += (sw ? 1 : -1) * (eventLayer.Contains(layerGUI) ? layerGUI : 0);
     }
 
-    public bool EventActive(bool sw)
+    public void EventActive(bool sw)
     {
-        if (eventCamera == null)
-            return false;
+        IEnumerable<int> eventLayer = factorization(eventCamera.eventReceiverMask.value);
+        eventCamera.eventReceiverMask.value += (sw ? 1 : -1) * (eventLayer.Contains(layerStage) ? layerStage : 0);
+    }
 
-        eventCamera.enabled = sw;
+    public void EventActive(string layerName, bool sw)
+    {
+        int layer = LayerMask.NameToLayer(layerName);
 
-        return true;
+        IEnumerable<int> eventLayer = factorization(eventCamera.eventReceiverMask.value);
+        eventCamera.eventReceiverMask.value += (sw ? 1 : -1) * (eventLayer.Contains(layer) ? layer : 0);
     }
 }

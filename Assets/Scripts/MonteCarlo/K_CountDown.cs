@@ -14,7 +14,14 @@ public class K_CountDown : MonoSingleton<K_CountDown>
     public override void OnInitialize()
     {
         turnlimit = K_OptionData.Get<int>("TurnLimit", 0);
-        this.gameObject.SetActive(K_Flag.State("GameMode") == 3);
+        try
+        {
+            this.gameObject.SetActive(K_Flag.State("GameMode") == 3);
+        }
+        catch (System.Exception)
+        {
+            this.gameObject.SetActive(false);
+        }
         //this.count = this.turnlimit;
         stopWatch = new System.Diagnostics.Stopwatch();
     }

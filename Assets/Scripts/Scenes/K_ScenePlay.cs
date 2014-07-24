@@ -13,7 +13,7 @@ public class K_ScenePlay : K_Scene
         catch (System.Exception)
         {
             K_DevelopOption.Instance.OnScreen = true;
-            K_Flag.On("GameMode", 3);
+            K_Flag.On("GameMode", 1);
             K_OptionData.Set<int>("TurnLimit", 5);
         }
         //

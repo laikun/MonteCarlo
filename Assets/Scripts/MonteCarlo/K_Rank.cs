@@ -9,6 +9,10 @@ public class K_Rank : MonoSingleton<K_Rank> {
     public override void OnInitialize()
     {
         this.FBlog("getScroe");
+
+        if (K_OptionData.Get<int>("FaceBook") != 1)
+            return;
+
         // 게임 전체의 스코어 취득
         K_FB.Instance.FBdigest(() => FB.API(FB.AppId + "/scores", Facebook.HttpMethod.GET, setRank));
     }

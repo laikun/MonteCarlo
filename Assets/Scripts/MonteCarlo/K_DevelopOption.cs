@@ -22,6 +22,7 @@ public class K_DevelopOption : SingletonInGame<K_DevelopOption>
     float[] turnlimit = {0f, 10f};
     float[] separate = {0.05f, 0.5f};
     bool pokerRule = false;
+    bool faceBook = false;
     
     protected override void awake()
     {
@@ -34,6 +35,7 @@ public class K_DevelopOption : SingletonInGame<K_DevelopOption>
         K_OptionData.Set<int>("TurnLimit", 5);
         K_OptionData.Set<float>("Separate", separate [0]);
         K_OptionData.Set<int>("PokerRule", pokerRule ? 1 : 0);
+        K_OptionData.Set<int>("FaceBook", faceBook ? 1 : 0);
 
     }
 
@@ -55,6 +57,7 @@ public class K_DevelopOption : SingletonInGame<K_DevelopOption>
             turnlimit[0] = K_OptionData.Get<int>("TurnLimit");
             separate [0] = K_OptionData.Get<float>("Separate");
             pokerRule = K_OptionData.Get<int>("PokerRule") == 1;
+            faceBook = K_OptionData.Get<int>("FaceBook") == 1;
         }
 
         if (!showUp)
@@ -219,6 +222,15 @@ public class K_DevelopOption : SingletonInGame<K_DevelopOption>
         GUILayout.EndHorizontal();
         GUILayout.Space(10f);
 
+        // Set FaceBook Log in
+        GUILayout.Space(50f);
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(10f);
+        GUILayout.Label("FaceBook Log In", GUILayout.Width(100));
+        GUILayout.FlexibleSpace();
+        faceBook = GUILayout.Toggle(faceBook, faceBook ? "On" : "Off", GUILayout.Width(150));
+        GUILayout.EndHorizontal();
+        GUILayout.Space(10f);
         
         #endregion
 
@@ -235,6 +247,7 @@ public class K_DevelopOption : SingletonInGame<K_DevelopOption>
             K_OptionData.Set<int>("TurnLimit", Mathf.RoundToInt(turnlimit [0]));
             K_OptionData.Set<float>("Separate", separate [0]);
             K_OptionData.Set<int>("PokerRule", pokerRule ? 1 : 0);
+            K_OptionData.Set<int>("FaceBook", faceBook ? 1 : 0);
         }
 
     }

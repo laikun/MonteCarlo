@@ -10,6 +10,8 @@ public class K_SubWindow : MonoSingleton<K_SubWindow> {
     public override void OnInitialize()
     {
         window = new Dictionary<string, GameObject>();
+        this.gameObject.SetActive(true);
+
         mode.ForEach(s => window.Add(s, this.transform.FindChild(s).gameObject));
 
         this.enabled = false;
@@ -18,7 +20,6 @@ public class K_SubWindow : MonoSingleton<K_SubWindow> {
 	
     public void PopUp(string mode)
     {
-        this.enabled = true;
         this.gameObject.SetActive(true);
 
         window.Where(w => !w.Key.Equals(mode)).ToList().ForEach(w => w.Value.SetActive(false));
@@ -28,7 +29,6 @@ public class K_SubWindow : MonoSingleton<K_SubWindow> {
 
     public void Disapear()
     {
-        this.enabled = false;
         this.gameObject.SetActive(false);
     }
 

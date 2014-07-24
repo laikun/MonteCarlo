@@ -45,7 +45,7 @@ public class K_Rule : MonoSingleton<K_Rule>
         });
 
         K_Cell.Instance.LoadToCell();
-        K_Cell.Instance.Cards.ForEach(c => K_Cell.Instance.SendMessage("goToCell", c));
+        K_Cell.Instance.ToPosition();
         K_Flag.On("InPlay", false);
 
         findCombination();
@@ -87,13 +87,8 @@ public class K_Rule : MonoSingleton<K_Rule>
     #region Enable Combinations
     Dictionary<IEnumerable<K_PlayingCard>, string> combinations = new Dictionary<IEnumerable<K_PlayingCard>, string>();
     /// <summary>
-    ///     /// 현재 셀에 있는 카드 중에서 가능한 조합들을 찾아 내고, 찾아내지 못할 경우 게임 오버 실행
-    /// - 포커룰을 적용할 경우 처리 부담이 높음으로 코루틴형식으로 실행
-    /// - 여전히 부담이 크고 잦은 호출이 필요함으로 대상을 셀 전체 혹은 전의 함수 실행 후 남은 카드로 함
-    /// - 다시태어남
+    /// 현재 셀에 있는 카드 중에서 가능한 조합들을 찾아 냄
     /// </summary>
-    /// <param name="mode">코루틴 - 일반 모드</param>
-    /// <returns>bool</returns>
     bool findCombination()
     {
         K_Report.Log("<b>" + name + "</b> : findCombination ");
@@ -105,12 +100,12 @@ public class K_Rule : MonoSingleton<K_Rule>
         // 포커룰 혹은 일반룰
         int max = pokerRule ? Mathf.Max(K_OptionData.Get<int>("Column"), K_OptionData.Get<int>("Row")) : 2;
 
-        System.Text.StringBuilder log = new System.Text.StringBuilder("<color=blue><b>" + name + "</b> : findCombination</color> \n");
-        log.Append("<color=blue>");
+        //System.Text.StringBuilder log = new System.Text.StringBuilder("<color=blue><b>" + name + "</b> : findCombination</color> \n");
+        //log.Append("<color=blue>");
         // 직선상의 카드들을 취득
         foreach (var item in K_Cell.Instance.GetCardsInLinear())
         {
-            log.Append(item.ToArray().ToString<MonoBehaviour>() + "\n");
+            //log.Append(item.ToArray().ToString<MonoBehaviour>() + "\n");
 
             // 2장 미만은 무의미
             if (item.Count() < 2)
@@ -132,13 +127,13 @@ public class K_Rule : MonoSingleton<K_Rule>
                         continue;
 
                     combinations.Add(combination.OrderBy(x => x).ToArray(), rank);
-                    log.Append("<i>" + rank + " - " + combination.ToArray().ToString<K_PlayingCard>() + "</i>\n");
+                    //log.Append("<i>" + rank + " - " + combination.ToArray().ToString<K_PlayingCard>() + "</i>\n");
                 }
             }
         }
 
-        log.Append("</color>");
-        K_Report.Log(log.ToString());
+        //log.Append("</color>");
+        //K_Report.Log(log.ToString());
 
         watch.Stop();
         K_Report.Log("<color=purple><b>" + name + "</b> : findCombination [TimeWatch :" + watch.ElapsedMilliseconds + "]</color>");
@@ -151,10 +146,9 @@ public class K_Rule : MonoSingleton<K_Rule>
     List<K_PlayingCard> selectedCards = new List<K_PlayingCard>();
 
     /// <summary>
-    /// 선택된 카드들의 조합체크(로직부)
+    /// 선택된 카드들의 조합체크
     /// </summary>
     /// <param name="card">새로 선택된 카드</param>
-    /// <returns></returns>
     public bool Select(K_PlayingCard card)
     {
         this.Log("Select (" + card.name + ")", "blue");
@@ -199,7 +193,7 @@ public class K_Rule : MonoSingleton<K_Rule>
         }
 
         // 조합 가능한 경우의 수가 두 가지 이상이면 적은 수의 조합을 선택
-        IEnumerable<K_PlayingCard> combi = new K_PlayingCard[0].Concat(combis.OrderBy(x => x.Count()).FirstOrDefault());
+        IEnumerable<K_PlayingCard> combi = combis.OrderBy(x => x.Count()).First();
 
         // 조합에 필요한 카드가 부족할때
         if (combi.Count() != target.Length)
@@ -212,7 +206,6 @@ public class K_Rule : MonoSingleton<K_Rule>
 
         combi.ToArray().ForEach(c =>
         {
-            c.Anim.Play("SetOff");
             UIEventListener.Get(c.gameObject).onClick = null;
         });
         selectedCards.Clear();
@@ -261,11 +254,11 @@ public class K_Rule : MonoSingleton<K_Rule>
             yield return null;
         } while (K_Cell.Instance.Cards.Any(c => c.IsPlaying));
 
-        // 현재 셀 위의 카드 중 조합가능한 카드가 없을 때
-        if (combinations.Count() < 1)
-        {
-            K_Deck.Instance.NeedForDraw();
-        }
+        //// 현재 셀 위의 카드 중 조합가능한 카드가 없을 때
+        //if (combinations.Count() < 1)
+        //{
+        //    K_Deck.Instance.NeedForDraw();
+        //}
 
         yield break;
     }
@@ -300,15 +293,16 @@ public class K_Rule : MonoSingleton<K_Rule>
             return;
         }
 
-        // 덱에 남은 카드가 있을때
-        K_Deck.Instance.ShowNextCard();
+         K_Cell.Instance.WorkDelayNow(x => {
 
-        // 셀 위의 카드에 이벤트 등록
-        K_Cell.Instance.Cards.ForEach(c => UIEventListener.Get(c.gameObject).onClick = g => K_Rule.Instance.Select(c));
-
-        // 제한시간 시동
-        K_CountDown.Instance.Go();
-        K_Flag.On("InPlay", true);
+            // 덱에 남은 카드가 있을때
+            K_Deck.Instance.ShowNextCard();
+            // 셀 위의 카드에 이벤트 등록
+            K_Cell.Instance.Cards.ForEach(c => UIEventListener.Get(c.gameObject).onClick = g => K_Rule.Instance.Select(c));
+            // 제한시간 시동
+            K_CountDown.Instance.Go();
+            K_Flag.On("InPlay", true);
+        }, b => !K_Cell.Instance.OnPosition);
 
         return;
     }

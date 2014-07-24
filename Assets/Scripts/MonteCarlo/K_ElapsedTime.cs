@@ -8,7 +8,14 @@ public class K_ElapsedTime : MonoSingleton<K_ElapsedTime> {
 
     public override void OnInitialize()
     {
-        this.gameObject.SetActive(K_Flag.State("GameMode") != 1);
+        try
+        {
+            this.gameObject.SetActive(K_Flag.State("GameMode") == 1);
+        }
+        catch (System.Exception)
+        {
+            this.gameObject.SetActive(false);
+        }
         //this.time = 0f;
         timeWatch = new System.Diagnostics.Stopwatch();
         StopCoroutine("progress");
